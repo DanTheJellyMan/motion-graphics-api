@@ -45,78 +45,76 @@ canvas {
 }
 
 #timeline {
-    --timeline-bg-color: hotpink;
+    --timeline-side-padding: 1rem;
+    --timeline-bg-color: hsl(230,30%,40%);
+    --timeline-border-width: 4px;
+
+    --tick-extra-gap: 0rem;
     --tick-side-padding: 5rem;
+    --tick-height: 30%;
+    --tick-aspect-ratio: 2/5;
+    --tick-fill: hsl(280,30%,55%);
 
     container: timeline / size;
-    position: relative;
 
     min-width: 200px;
     width: 75%;
     height: 4rem;
-    overflow: auto;
+    padding: 0 calc(1.5rem + var(--timeline-side-padding));
+    overflow-x: auto;
+    overflow-y: hidden;
 
     background-color: var(--timeline-bg-color);
-    border: 2px solid hsla(0,0%,100%,1);
-    border-radius: 0.5rem;
-}
-#timeline > * {
-    position: relative;
+    border: var(--timeline-border-width) solid hsla(0,0%,100%,1);
+    border-radius: 0 0 0.5rem 0.5rem;
 }
 
-#timeline > .bg-fill {
-    --tick-color: hsla(0,0%,30%,0.75);
-    --tick-width: 0.5vw;
-    --tick-height: clamp(15px, calc(100cqh/3), 40px);
-    --tick-gap: 25px;
-    --top-bottom-gradient: repeating-linear-gradient(
-        transparent,
-        transparent var(--tick-height),
-        var(--timeline-bg-color) var(--tick-height),
-        var(--timeline-bg-color) calc(100% - var(--tick-height)),
-        transparent calc(100% - var(--tick-height)),
-        transparent 100%
-    );
-    --top-gradient: repeating-linear-gradient(
-        transparent,
-        transparent var(--tick-height),
-        var(--timeline-bg-color) var(--tick-height),
-        var(--timeline-bg-color) 100%
-    );
-    --bottom-gradient: repeating-linear-gradient(
-        var(--timeline-bg-color),
-        var(--timeline-bg-color) calc(100% - var(--tick-height)),
-        transparent calc(100% - var(--tick-height)),
-        transparent 100%
-    );
-    --selected-tick-style: var(--bottom-gradient);
-    
-    position: absolute !important;
+#tick-container {
+    display: flex;
+    align-items: end;
+    gap: calc(0.5rem + var(--tick-extra-gap));
 
     width: 100%;
     height: 100%;
-    
-    /* CALCULATION VARIABLES -- DO NOT MODIFY! */
-    /* --available-tick-width: calc(100cqw - (var(--tick-gap)*2));
-    --tick-total-width: calc(var(--tick-width) + var(--tick-gap));
-    --tick-gradient: repeating-linear-gradient(90deg,
-        var(--tick-color),
-        var(--tick-color) var(--tick-width),
-        var(--timeline-bg-color) var(--tick-width),
-        var(--timeline-bg-color) calc(var(--tick-width) + var(--tick-gap))
-    );
-    --side-padding-gradient: linear-gradient(90deg,
-        var(--timeline-bg-color),
-        var(--timeline-bg-color) calc(var(--tick-side-padding) - (var(--tick-width)/2)),
-        transparent calc(var(--tick-side-padding) - (var(--tick-width)/2)),
-        transparent calc(100% - var(--tick-side-padding) + (var(--tick-width)/2)),
-        var(--timeline-bg-color) calc(100% - var(--tick-side-padding) + (var(--tick-width)/2)),
-        var(--timeline-bg-color) 100%
-    ); */
-    /* --------------------------------------- */
+}
 
-    /* background: var(--side-padding-gradient), var(--selected-tick-style), var(--tick-gradient); */
-    border-radius: inherit;
+#tick-container > .tick {
+    position: relative;
+    
+    height: var(--tick-height);
+    aspect-ratio: var(--tick-aspect-ratio);
+
+    background-color: var(--tick-fill);
+}
+#tick-container > .tick:active {
+    filter: brightness(110%) saturate(125%) sepia(25%) drop-shadow(1px 0 0 hsla(0,0%,0%,0.5));
+}
+#tick-container > .tick.active::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    translate: -50% 0;
+    
+    width: 20px;
+    height: 100cqh;
+    
+    background-color: hsl(100, 50%, 60%);
+    clip-path: path("M2.5 0 L17.5 0 L10 7.5 Z");
+    z-index: 6;
+}
+#tick-container > .tick.active::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    translate: -50% 0;
+
+    width: 2px;
+    height: 100cqh;
+
+    background: linear-gradient(180deg, hsl(100, 60%, 50%), hsla(100, 35%, 60%, 0.5));
+    z-index: 5;
 }
 
 #graphic-designer {
@@ -124,5 +122,5 @@ canvas {
 
     background-color: hsla(140, 30%, 30%, 0.5);
     border: 2px solid hsl(120, 20%, 10%);
-    border-radius: 2rem 0 0 2rem;
+    border-radius: 1.25rem 0 0 0.5rem;
 }
