@@ -1,4 +1,5 @@
-import * as D3 from "/lib/d3/d3-interpolate/index.js";
+import * as Flubber from "flubber";
+import * as D3 from "d3";
 
 export default class GraphicNode {
     static #svgNS = "http://www.w3.org/2000/svg";
@@ -347,7 +348,7 @@ export default class GraphicNode {
                 switch (n) {
                     case "d":
                     case "path":
-                        interpolator = flubber.interpolate(v, endKeyframe.attribs[n], {
+                        interpolator = Flubber.interpolate(v, endKeyframe.attribs[n], {
                             maxSegmentLength: pathInterpQuality
                         });
                         break;

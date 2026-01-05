@@ -1,5 +1,5 @@
-import Graphic from "/lib/Graphic.js";
-import GraphicNode from "/lib/GraphicNode.js";
+import Graphic from "./modules/Graphic.js";
+import GraphicNode from "./modules/GraphicNode.js";
 
 const ctx = document.querySelector("#preview-container > canvas").getContext("2d");
 const designer = document.querySelector("#graphic-designer");
@@ -8,7 +8,7 @@ const GRAPHIC_HEIGHT = 1000;
 const GRAPHIC_BG_COLOR = "hsl(300,0%,30%)";
 
 const graphic = new Graphic(GRAPHIC_WIDTH, GRAPHIC_HEIGHT, Infinity, 1.5);
-graphic.setGifFps(45);
+graphic.setFps(45);
 graphic.setGifEncoderSettings(10, false, navigator.hardwareConcurrency, GRAPHIC_BG_COLOR);
 graphic.setSvgViewBox(`0 0 ${GRAPHIC_WIDTH} ${GRAPHIC_HEIGHT}`);
 
@@ -112,24 +112,8 @@ graphic.addNode(parentNode);
 
 const startT = performance.now();
 
-graphic.render("SVG").then(handleRenderFinish);
-// graphic.render("GIF", async (_, blob) => {
-//     const url = URL.createObjectURL(blob);
-//     const img = new Image();
-//     img.src = url;
-//     await img.decode();
-//     const { width: canvWidth, height: canvHeight } = ctx.canvas;
-//     const aspectRatio = img.width / img.height;
-//     ctx.clearRect(0, 0, canvWidth, canvHeight);
-//     ctx.drawImage(
-//         img,
-//         0,
-//         0,
-//         (canvWidth * (aspectRatio > 1)) + ((canvHeight * aspectRatio * (aspectRatio <= 1))),
-//         (canvHeight * (aspectRatio >= 1)) + (canvWidth * (1/aspectRatio) * (aspectRatio > 1))
-//     );
-//     URL.revokeObjectURL(url);
-// }).then(handleRenderFinish);
+// graphic.render("SVG").then(handleRenderFinish);
+// graphic.render("GIF").then(handleRenderFinish);
 
 function handleRenderFinish(blob) {
     console.log(`Render Time: ${(performance.now() - startT)/1000} seconds`);
