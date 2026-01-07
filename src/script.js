@@ -1,14 +1,14 @@
 import Graphic from "./modules/Graphic.js";
 import GraphicNode from "./modules/GraphicNode.js";
 
-const ctx = document.querySelector("#preview-container > canvas").getContext("2d");
+const ctx = document.querySelector("#preview-container > canvas").getContext("bitmaprenderer");
 const designer = document.querySelector("#graphic-designer");
 const GRAPHIC_WIDTH = 1000;
 const GRAPHIC_HEIGHT = 1000;
 const GRAPHIC_BG_COLOR = "hsl(300,0%,30%)";
 
-const graphic = new Graphic(GRAPHIC_WIDTH, GRAPHIC_HEIGHT, Infinity, 1.5);
-graphic.setFps(45);
+const graphic = new Graphic(GRAPHIC_WIDTH, GRAPHIC_HEIGHT, Infinity, 1);
+graphic.setFps(120);
 graphic.setGifEncoderSettings(10, false, navigator.hardwareConcurrency, GRAPHIC_BG_COLOR);
 graphic.setSvgViewBox(`0 0 ${GRAPHIC_WIDTH} ${GRAPHIC_HEIGHT}`);
 
@@ -114,6 +114,10 @@ const startT = performance.now();
 
 // graphic.render("SVG").then(handleRenderFinish);
 // graphic.render("GIF").then(handleRenderFinish);
+graphic.render("VIDEO", null, async (bitmap, i) => {
+    ctx.transferFromImageBitmap(bitmap);
+    console.log(`${i+1} / ${graphic.getFps() * graphic.getDuration()}`);
+}).then(handleRenderFinish);
 
 function handleRenderFinish(blob) {
     console.log(`Render Time: ${(performance.now() - startT)/1000} seconds`);

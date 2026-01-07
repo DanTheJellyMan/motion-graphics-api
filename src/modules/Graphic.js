@@ -1,4 +1,4 @@
-import { CanvasSource, QUALITY_VERY_HIGH, Mp4OutputFormat, BufferTarget, Output } from "mediabunny";
+import { CanvasSource, Mp4OutputFormat, BufferTarget, Output, QUALITY_VERY_HIGH } from "mediabunny";
 import GraphicNode from "./GraphicNode.js";
 
 export default class Graphic {
@@ -24,8 +24,7 @@ export default class Graphic {
     #videoEncoderConfig = null;
 
     constructor(width, height, repeatCount, duration) {
-        this.#width = width;
-        this.#height = height;
+        this.setSize(width, height);
         this.#repeatCount = repeatCount;
         this.#duration = duration;
         this.setGifEncoderSettings();
@@ -38,18 +37,12 @@ export default class Graphic {
         this.#nodes.splice(index, 1);
     }
 
-    setWidth(width) {
+    setSize(width, height) {
         this.#width = width;
-    }
-    getWidth() {
-        return this.#width;
-    }
-
-    setHeight(height) {
         this.#height = height;
     }
-    getHeight() {
-        return this.#height;
+    getSize() {
+        return [this.#width, this.#height];
     }
 
     setRepeatCount(repeatCount) {
@@ -67,13 +60,6 @@ export default class Graphic {
     }
 
     setFps(fps) {
-        if (fps > 60) {
-            this.#fps = 60;
-            return console.warn("Max GIF FPS: 60");
-        }
-        if (fps > 30) {
-            console.warn("WARNING: FPS counts above 30 may not play back at the full FPS. Be cautious of potential slowdowns in playback speed post-render");
-        }
         this.#fps = fps;
     }
     getFps() {
@@ -145,9 +131,18 @@ export default class Graphic {
     /**
      * @param {string} renderMode Available options: 'GIF', 'SVG', 'VIDEO'
      * @param {(blob: Blob) => {}} finishedCallback 
+     * @param {(bitmap: ImageBitmap, index: number) => {}} frameRenderCallback Called after every GIF render encoder.addFrame() call, or VIDEO render frame encode.
+     * 
+     * Note: "index" parameter is 0-indexed. The ImageBitmap is closed in the render method, so there is no need to manually do so in frameRenderCallback
      * @returns {Promise<Blob|null>} Even though SVG "rendering" happens fully synchronously, a promise is still returned for simplicity of usage
      */
-    render(renderMode, finishedCallback = ()=>{}) {
+    render(renderMode, finishedCallback = null, frameRenderCallback = null) {
+        finishedCallback ??= ()=>{};
+        frameRenderCallback ??= ()=>{};
+        let bitmapCleanupFunction = (bitmap, index) => {
+            frameRenderCallback(bitmap, index);
+            bitmap.close();
+        }
         const { canvas } = this.#renderCtx;
         canvas.width = this.#width;
         canvas.height = this.#height;
@@ -168,28 +163,28 @@ export default class Graphic {
                 console.error(`${renderMode} - invalid render mode`);
                 renderFunction = invalidModeFunction;
         }
-        renderFunction = renderFunction.bind(this);
-        return renderFunction(finishedCallback);
+        return renderFunction.call(this, finishedCallback, bitmapCleanupFunction);
     }
 
-    async #handleGifRender(finishedCallback) {
+    async #handleGifRender(finishedCallback, frameRenderCallback) {
+        let fps = this.#fps;
+        if (fps > 60) {
+            fps = 60;
+            console.warn("Max GIF FPS: 60");
+        } else if (fps > 30) {
+            console.warn("WARNING: GIF FPS counts above 30 may not play back at the full FPS. Be cautious of potential slowdowns in playback speed post-render");
+        }
         const encoder = this.#gifEncoder;
         const renderCtx = this.#renderCtx;
-        const renderCanvas = renderCtx.canvas;
-        const frameCount = this.#fps * this.#duration;
+        const frameCount = fps * this.#duration;
         const delay = (this.#duration * 1000) / (frameCount+1);
         
         for (let i=0; i<=frameCount; i++) {
             const t = i / frameCount;
             await this.drawFrame(t, renderCtx);
 
-            const frameBlob = await renderCanvas.convertToBlob();
-            const url = URL.createObjectURL(frameBlob);
-            const canvImg = new Image();
-            canvImg.src = url;
-            await canvImg.decode();
-            encoder.addFrame(canvImg, { delay, copy: true });
-            URL.revokeObjectURL(url);
+            encoder.addFrame(renderCtx.canvas, { delay, copy: true });
+            frameRenderCallback(renderCtx.canvas.transferToImageBitmap(), i);
         }
 
         const finishedPromise = new Promise((resolve) => {
@@ -252,34 +247,60 @@ export default class Graphic {
         return svgBlob;
     }
 
-    async #handleVideoRender() {
+    async #handleVideoRender(finishedCallback, frameRenderCallback) {
         const renderCtx = this.#renderCtx;
         const frameCount = this.#fps * this.#duration;
+        const frameDuration = 1 / this.#fps;
 
         const output = new Output({
-            format: new Mp4OutputFormat({ fastStart: "in-memory" }),
+            format: new Mp4OutputFormat({ fastStart: false }),
             target: new BufferTarget()
         });
-        const videoSource = new CanvasSource(renderCtx.canvas);
-        output.addVideoTrack
+        const videoSource = new CanvasSource(renderCtx.canvas, {
+            codec: "av1",
+            bitrateMode: "variable",
+            bitrate: QUALITY_VERY_HIGH,
+            sizeChangeBehavior: "deny"
+        });
+        output.addVideoTrack(videoSource, {
+            frameRate: this.#fps
+        });
+        await output.start();
 
         for (let i=0; i<frameCount; i++) {
             const t = i / frameCount;
+            const timestamp = t * this.#duration;
             await this.drawFrame(t, renderCtx);
-            
-        }
 
-        resolve(null);
+            await videoSource.add(timestamp, frameDuration);
+            frameRenderCallback(renderCtx.canvas.transferToImageBitmap(), i);
+        }
+        videoSource.close();
+        await output.finalize();
+
+        const blob = new Blob([output.target.buffer], {
+            type: await output.getMimeType()
+        });
+        finishedCallback(blob);
+        return blob;
     }
 
     async drawFrame(t, ctx = this.#renderCtx) {
+        const images = Array(this.#nodes.length);
+        const imgDecodePromises = Array(images.length);
         const { width, height } = ctx.canvas;
         ctx.clearRect(0, 0, width, height);
-        for (const node of this.#nodes) {
-            const svg = node.generateElement(t, 1);
+
+        for (let i=0; i<this.#nodes.length; i++) {
+            const svg = this.#nodes[i].generateElement(t, 1);
             const img = GraphicNode.createSvgImage(svg);
-            await img.decode();
-            ctx.drawImage(img, 0, 0, width, height);
+            imgDecodePromises[i] = img.decode();
+            images[i] = img;
+        }
+        await Promise.all(imgDecodePromises);
+
+        for (let i=0; i<images.length; i++) {
+            ctx.drawImage(images[i], 0, 0, width, height);
         }
     }
 
