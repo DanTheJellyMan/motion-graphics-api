@@ -259,7 +259,7 @@ export default class Graphic {
         const videoSource = new CanvasSource(renderCtx.canvas, {
             codec: "av1",
             bitrateMode: "variable",
-            bitrate: QUALITY_VERY_HIGH,
+            bitrate: 20_000_000,
             sizeChangeBehavior: "deny"
         });
         output.addVideoTrack(videoSource, {
