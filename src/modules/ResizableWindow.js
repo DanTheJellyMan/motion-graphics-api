@@ -4,7 +4,7 @@ export default class ResizableWindow extends HTMLElement {
         "split": "50%",
         "min-split": "25%",
         "max-split": "75%",
-        "resizable-area-length": "10"
+        "resizable-area-length": "2"
     }
     static #attributeTesters = {
         resize: (value) => {
@@ -34,7 +34,6 @@ export default class ResizableWindow extends HTMLElement {
     /* NOTE: maximum children per window: 2
         (if trying to add more, add additional ResizableWindows inside one of the 2 windows with the same "resize" attribute for a similar effect)
     */ 
-
     constructor() {
         super();
     }
@@ -70,50 +69,35 @@ export default class ResizableWindow extends HTMLElement {
         this.style.setProperty("display", "grid", "important");
 
         // Setting event listeners
-        this.addEventListener("pointermove", this.#handleMousemove);
+        this.addEventListener("pointermove", this.#handleMousemove, {
+            passive: true,
+            capture: true
+        });
         this.addEventListener("pointerdown", this.#handleMousedown);
         document.addEventListener("pointerup", this.#handleMouseup.bind(this));
     }
 
-    canMouseResize(x, y) {
-        if (this.children.length < 2) return false;
-        const lastRect = this.children[1].getBoundingClientRect();
-        const resizableAreaLength = parseFloat(this.getAttribute("resizable-area-length"));
-
-        const resize = this.getAttribute("resize");
-        switch(resize) {
-            case "horizontal":
-                if (lastRect.left - resizableAreaLength <= x &&
-                    lastRect.left + resizableAreaLength >= x
-                ) return true;
-                break;
-            case "vertical":
-                if (lastRect.top - resizableAreaLength <= y &&
-                    lastRect.top + resizableAreaLength >= y
-                ) return true;
-                break;
-        }
-        return false;
-    }
-
     #handleMousemove(e) {
-        if (this.children.length < 2) return;
         const { clientX, clientY } = e;
         const mousedown = this.#mousedown;
-        if (!this.canMouseResize(clientX, clientY) && !mousedown) {
-            this.style.setProperty("cursor", "default", null);
+        if ((!this.canMouseResize(clientX, clientY) && !mousedown) || !this.hasDeeperHoveredElements(clientX, clientY)) {
+            document.documentElement.style.setProperty("cursor", "default", null);
             return;
         }
         
         const resize = this.getAttribute("resize");
+        let cursorType = "default";
         switch(resize) {
             case "horizontal":
-                this.style.setProperty("cursor", "ew-resize", "important");
+                cursorType = "ew-resize";
+                e.stopPropagation();
                 break;
             case "vertical":
-                this.style.setProperty("cursor", "ns-resize", "important");
+                cursorType = "ns-resize";
+                e.stopPropagation();
                 break;
         }
+        document.documentElement.style.setProperty("cursor", cursorType, null);
         if (!mousedown) return;
 
         const parentRect = this.getBoundingClientRect();
@@ -127,6 +111,66 @@ export default class ResizableWindow extends HTMLElement {
                 break;
         }
         this.setAttribute("split", `${t*100}%`);
+    }
+    canMouseResize(x, y) {
+        if (this.children.length < 2) return false;
+
+        // The 1st child is taken for odd-children counts, or 2nd for even
+        const rect = this.children[(this.children.length+1)%2].getBoundingClientRect();
+        const resizableAreaLength = parseFloat(this.getAttribute("resizable-area-length"));
+
+        const resize = this.getAttribute("resize");
+        switch(resize) {
+            case "horizontal":
+                if (rect.left - resizableAreaLength <= x &&
+                    rect.left + resizableAreaLength >= x
+                ) return true;
+                break;
+            case "vertical":
+                if (rect.top - resizableAreaLength <= y &&
+                    rect.top + resizableAreaLength >= y
+                ) return true;
+                break;
+        }
+        return false;
+    }
+    hasDeeperHoveredElements(x, y) {
+        const isHovered = (element) => {
+            const rect = element.getBoundingClientRect();
+            const inHorizontally = x >= rect.left && x <= rect.right;
+            const inVertically = y >= rect.top && y <= rect.bottom;
+            return inHorizontally && inVertically;
+        }
+
+        const descendants = this.querySelectorAll("resizable-window");
+        for (let i=0; i<descendants.length; i++) {
+            if (isHovered(descendants[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+    getSiblings(mustBeSameType = false) {
+        const name = this.nodeName;
+        const siblings = [];
+
+        let temp = this.previousElementSibling;
+        while (temp !== null) {
+            if (!mustBeSameType || temp.nodeName === name) {
+                siblings.push(temp);
+            }
+            temp = temp.previousElementSibling;
+        }
+
+        temp = this.nextElementSibling;
+        while (temp !== null) {
+            if (!mustBeSameType || temp.nodeName === name) {
+                siblings.push(temp);
+            }
+            temp = temp.nextElementSibling;
+        }
+
+        return siblings;
     }
 
     #handleMousedown(e) {
@@ -143,6 +187,9 @@ export default class ResizableWindow extends HTMLElement {
 
     attributeChangedCallback(name, oldValue, newValue) {
         if (!ResizableWindow.#attributeTesters[name](newValue)) {
+            if (!ResizableWindow.#attributeTesters[name](oldValue)) {
+                return this.setAttribute(name, ResizableWindow.#defaultAttributes[name]);
+            }
             return this.setAttribute(name, oldValue);
         }
         

@@ -84,21 +84,6 @@ body {
     height: 100%;
 }
 
-#main > *:first-child {
-    min-width: 100%;
-    max-width: 100% !important;
-
-    background-color: lime;
-    border: 16px solid hotpink;
-}
-
-
-
-#main > *:last-child {
-    background-color: purple;
-    border: 16px solid red;
-}
-
 @keyframes fade-in {
     from {
         opacity: 0;

@@ -45,15 +45,53 @@
 
 
 
-    <resizable-window id="main" resize="horizontal" split="75%">
-        <resizable-window>
+    <resizable-window id="main" resize="horizontal" split="75%" min-split="60%" max-split="90%">
+
+        <!-- Left half -->
+        <resizable-window resize="vertical" split="70%" min-split="50%" max-split="85%">
+
+            <!-- Top area -->
+            <resizable-window resize="horizontal" split="25%" min-split="15%" max-split="50%">
+
+                <!-- Tools & options area -->
+                <resizable-window id="tools-container" resize="vertical" split="50%" min-split="calc(100% * (1/3))" max-split="calc(100% * (2/3))">
+
+                    <!-- Tools and shapes -->
+                    <resizable-window id="tools" style="background-color: hsl(20,30%,60%);"></resizable-window>
+
+                    <!-- Options -->
+                    <resizable-window id="tool-options" style="background-color: hsl(30,40%,60%);"></resizable-window>
+
+                </resizable-window>
+
+                <!-- Preview -->
+                <resizable-window id="preview-container" style="background-color: lightpink;"></resizable-window>
+                
+            </resizable-window>
+
+            <!-- Timeline -->
+            <resizable-window id="timeline-container" style="background-color: greenyellow;"></resizable-window>
 
         </resizable-window>
 
+        <!-- Right half -->
+        <resizable-window resize="vertical" split="25%" min-split="10%" max-split="calc(100% / 3)">
 
-        <resizable-window>
+            <!-- Top -->
+            <resizable-window id="menu-options" resize="vertical" style="background-color: orange;"></resizable-window>
             
+            <resizable-window resize="vertical" split="calc(100% * (2/5))" min-split="calc(100% * (1/5))" max-split="calc(100% * (4/5))">
+
+                <!-- Middle -->
+                <resizable-window id="raw-node-container" style="background-color: yellow;"></resizable-window>
+
+                <!-- Bottom -->
+                <resizable-window id="node-hierarchy" style="background-color: darkgreen;"></resizable-window>
+
+            </resizable-window>
+
         </resizable-window>
+
     </resizable-window>
 </body>
 </html>
