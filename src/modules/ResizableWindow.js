@@ -49,6 +49,7 @@ export default class ResizableWindow extends HTMLElement {
         }
     }
 
+    // TODO: maybe add a function that automatically creates child ResizableWindows if more than 2 children are detected
     connectedCallback() {
         // Setting default attributes
         for (const [attributeName, attributeValue] of Object.entries(ResizableWindow.#defaultAttributes)) {
@@ -64,9 +65,17 @@ export default class ResizableWindow extends HTMLElement {
             if (ResizableWindow.#attributeTesters[attributeName](attributeValue)) continue;
             this.setAttribute(attributeName, ResizableWindow.#defaultAttributes[attributeName]);
         }
+        this.draggable = false;
+        this.tabIndex = "-1";
 
         // Setting default CSS styles
-        this.style.setProperty("display", "grid", "important");
+        const nodeName = "RESIZABLE-WINDOW";
+        const allChildrenAreWindows = Array.from(this.children).every((child) => child.nodeName === nodeName);
+        this.style.setProperty(
+            "display",
+            "grid",
+            (this.children.length === 2 && allChildrenAreWindows) ? "important" : ""
+        );
 
         // Setting event listeners
         this.addEventListener("pointermove", this.#handleMousemove, {
@@ -80,10 +89,10 @@ export default class ResizableWindow extends HTMLElement {
     #handleMousemove(e) {
         const { clientX, clientY } = e;
         const mousedown = this.#mousedown;
-        if ((!this.canMouseResize(clientX, clientY) && !mousedown) || !this.hasDeeperHoveredElements(clientX, clientY)) {
-            document.documentElement.style.setProperty("cursor", "default", null);
-            return;
-        }
+        let topmostAncestor = this.getTopmostAncestor();
+        if (this.canMouseResize(clientX, clientY) || mousedown);
+        else
+            return topmostAncestor.style.setProperty("cursor", "default", "important");
         
         const resize = this.getAttribute("resize");
         let cursorType = "default";
@@ -97,7 +106,7 @@ export default class ResizableWindow extends HTMLElement {
                 e.stopPropagation();
                 break;
         }
-        document.documentElement.style.setProperty("cursor", cursorType, null);
+        topmostAncestor.style.setProperty("cursor", cursorType, "important");
         if (!mousedown) return;
 
         const parentRect = this.getBoundingClientRect();
@@ -150,6 +159,7 @@ export default class ResizableWindow extends HTMLElement {
         }
         return false;
     }
+
     getSiblings(mustBeSameType = false) {
         const name = this.nodeName;
         const siblings = [];
@@ -171,6 +181,15 @@ export default class ResizableWindow extends HTMLElement {
         }
 
         return siblings;
+    }
+
+    getTopmostAncestor() {
+        const targetName = "RESIZABLE-WINDOW";
+        let ancestor = this;
+        while (ancestor && ancestor.parentElement.nodeName === targetName) {
+            ancestor = ancestor.parentElement;
+        }
+        return ancestor;
     }
 
     #handleMousedown(e) {
@@ -207,20 +226,50 @@ export default class ResizableWindow extends HTMLElement {
             );
         }
 
+        const setChildrenBorderWidths = (resize, resizableAreaLength) => {
+            resize ??= this.getAttribute("resize");
+            resizableAreaLength ??= this.getAttribute("resizable-area-length");
+            if (this.children.length === 0 || !resize || !resizableAreaLength) return;
+            resizableAreaLength /= 2;
+
+            const [c1, c2] = this.children;
+            switch(resize) {
+                case "vertical":
+                    c1.style.setProperty("border-bottom-width", `${resizableAreaLength}px`, "important");
+                    c2.style.setProperty("border-top-width", `${resizableAreaLength}px`, "important");
+
+                    c1.style.setProperty("border-right-width", 0, "");
+                    c2.style.setProperty("border-left-width", 0, "");
+                    break;
+                case "horizontal":
+                    c1.style.setProperty("border-right-width", `${resizableAreaLength}px`, "important");
+                    c2.style.setProperty("border-left-width", `${resizableAreaLength}px`, "important");
+
+                    c1.style.setProperty("border-bottom-width", 0, "important");
+                    c2.style.setProperty("border-top-width", 0, "important");
+                    break;
+            }
+        }
+
         switch(name) {
             case "split":
-                this.style.setProperty("--split", newValue);
+                this.style.setProperty("--split", newValue, "important");
                 break;
             case "resize":
-                this.style.setProperty("grid-template-rows", null, null);
-                this.style.setProperty("grid-template-columns", null, null);
+                this.style.setProperty("grid-template-rows", "", "important");
+                this.style.setProperty("grid-template-columns", "", "important");
                 setGridTemplate(null, null, newValue);
+                setChildrenBorderWidths(newValue, null);
                 break;
             case "min-split":
                 setGridTemplate(newValue);
                 break;
             case "max-split":
                 setGridTemplate(null, newValue);
+                break;
+            case "resizable-area-length":
+                this.style.setProperty("--resizable-area-length", `${newValue}px`, "");
+                setChildrenBorderWidths(null, newValue);
                 break;
         }
     }
