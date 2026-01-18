@@ -372,4 +372,58 @@ export default class GraphicNode {
 
         return element;
     }
+
+    static fromSerialized(serializedString) {
+        const deserialize = (obj) => {
+            const graphicNode = new GraphicNode(obj.elementName, obj.id, obj.className);
+            graphicNode.setTextContent(obj.textContent);
+            for (let i=0; i<obj.keyframes.length; i++) {
+                graphicNode.addKeyframe(obj.keyframes[i]);
+            }
+            return graphicNode;
+        }
+        serializedString = JSON.parse(serializedString);
+        const graphicNode = deserialize(serializedString);
+        const stack = [[serializedString, graphicNode]];
+
+        while (stack.length > 0) {
+            const [serialized, node] = stack.pop();
+
+            for (let i=0; i<serialized.children.length; i++) {
+                const childSerialized = serialized.children[i];
+                const childNode = deserialize(childSerialized);
+                node.appendChild(childNode);
+                stack.push([childSerialized, childNode]);
+            }
+        }
+
+        return graphicNode;
+    }
+    serializeToString() {
+        const serialize = (graphicNode) => {
+            return {
+                elementName: graphicNode.#elementName,
+                id: graphicNode.#id,
+                className: graphicNode.#className,
+                textContent: graphicNode.#textContent,
+                keyframes: graphicNode.#keyframes,
+                children: []
+            }
+        }
+        const stack = [[this, serialize(this)]];
+        const json = stack[0][1];
+
+        while (stack.length > 0) {
+            const [graphicNode, serializedNode] = stack.pop();
+
+            for (let i=0; i<graphicNode.#children.length; i++) {
+                const node = graphicNode.#children[i];
+                const serializedChild = serialize(node);
+                serializedNode.children.push(serializedChild);
+                stack.push([node, serializedChild]);
+            }
+        }
+
+        return JSON.stringify(json);
+    }
 }

@@ -375,4 +375,27 @@ export default class Graphic {
             return true;
         }
     }
+
+    exportProjectData(includeUI = false) {
+        const serializedNodes = this.#nodes.map((node) => node.serializeToString());
+        const extraData = {};
+        if (includeUI) {
+            extraData.ui = {};
+        }
+
+        return {
+            graphic: {
+                nodes: serializedNodes,
+                width: this.#width,
+                height: this.#height,
+                repeatCount: this.#repeatCount,
+                duration: this.#duration,
+                fps: this.#fps,
+                viewBox: this.#viewBox,
+                preserveAspectRatio: this.#preserveAspectRatio,
+                videoEncoderConfig: this.#videoEncoderConfig
+            },
+            ...extraData
+        }
+    }
 }
