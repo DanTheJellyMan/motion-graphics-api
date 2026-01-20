@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion Graphics API</title>
+
+    <script src="public/gif-js/gif.js"></script>
+  <script type="module" crossorigin src="/motion-graphics-api/assets/index-CmrhLJLV.js"></script>
+  <link rel="stylesheet" crossorigin href="/motion-graphics-api/assets/index-ODPad3QX.css">
+</head>
+
+<body>
+    <div id="toolbar" tabindex="-1">
+        <div class="dropdown">
+            <p>File</p>
+            <ul>
+                <li>Import</li>
+                <li>Open Project</li>
+                <hr />
+                <li>Export</li>
+                <li>Save Project</li>
+            </ul>
+        </div>
+        
+        <div class="dropdown">
+            <p>Edit</p>
+            <ul>
+                <li>Undo</li>
+                <li>Redo</li>
+                <hr />
+                <li>Cut</li>
+                <li>Copy</li>
+                <li>Paste</li>
+            </ul>
+        </div>
+
+        <div class="dropdown">
+            <p>View</p>
+            <ul>
+                <li>Zoom In</li>
+                <li>Zoom Out</li>
+                <li onclick="document.body.requestFullscreen()">
+                    Fullscreen
+                </li>
+            </ul>
+        </div>
+
+        <div class="dropdown">
+            <p>Graphic</p>
+            <ul>
+                <li>Graphic Size</li>
+                <li>Repeat Count</li>
+                <li>Duration</li>
+                <hr />
+                <li>View Box</li>
+                <li>Preserve Aspect Ratio</li>
+                <hr />
+                <li>Frame Rate</li>
+                <li>Video Encoder Config</li>
+            </ul>
+        </div>
+    </div>
+
+
+
+    <resizable-window id="main" resize="horizontal" split="75%" min-split="60%" max-split="90%" resizable-area-length="10">
+
+        <!-- Left half -->
+        <resizable-window resize="vertical" split="70%" min-split="50%" max-split="85%">
+
+            <!-- Top area -->
+            <resizable-window resize="horizontal" split="25%" min-split="15%" max-split="50%">
+
+                <!-- Tools & options area -->
+                <resizable-window id="tools-container" resize="vertical" split="50%" min-split="calc(100% * (1/3))" max-split="calc(100% * (2/3))">
+
+                    <!-- Tools and shapes -->
+                    <resizable-window id="tools">
+                        <p>Tools</p>
+                        <div>
+                            <abbr title="basic-node">
+                                <img draggable="false" src="data:image/webp;base64,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" />
+                            </abbr>
+                            <abbr title="rectangle-node">
+                                <img draggable="false" src="data:image/webp;base64,UklGRi4EAABXRUJQVlA4TCIEAAAvP8APEBenoG0jx/xJ3/2eAOZ//hWkbcCi/alt24aB1xT6DSAm+EmgDQC8lKFLaK+80GftWHTs5krnLSQOIYMRhGzbtg1JOhGRNsu2bdu2bdvVtm3btm3biF+pGzcis9/6KaL/EwD//1JuAUEzA80pPEoThAz0ErCQOwchPU1QPKeJ9Ztmbqi2xTPN34TcsMRLhJcwvgm5sEyCUA58otF36/DSrtLoP1P2eDt/0OgLHgjV+GeGJ+142XeZFjvjHaIZr4Rg/Pxw+/bt25M+eD6zbiNvXkiQ49Uduo28PFuH8XlzampqqpsET+GZikyJV1N41hGpyEQvHsarYfiHMXikUVEkB86uOp6xkFI7ezk7Yv2VAUvCOAhl0vllgewgbPGtszUK0ghEUatfncpUMyn7PtJPuwBA5l6x8eq2LJ3B/IdPnOyL1FJMwpC1x2eFw0xt7MCRg2PRckPwras3Hl5eYkMB0ik6whrI8HRPAQIoTeHaE+tqvPgER5Rp8uTJvV3+FDAO7drWCGwtW49emhdrIeBE6V2778GKKBlgPqLpo6wA3EcfP+92E5OseIrM7S9OJkkA+xFNn+CAUgQs/nClzpQNz33V0/MNej5hBECI7HI3X9tRKCUw+M59N84PROhJYMkVAMjDOneeXBArY7Cr3HJ+ebGjEFgbAMA8e8HJna1+MgDQpEzu39vrJwYODQKUde3h8wvyHJRe9bvOLE0VEWBsAJTl+I3LE3kbnh0p1QLHF79+3W0IAPBd95P+1WoGnOdv2VFqGMuB++8vfD9frOdMbm6hMACpLt15dkVJVM2+80tSJBwZVpMw6+SurlA5qUybPrC7J4TPGWWVX51oxk7i07jp3Mp0Hcy0rdx0ek2Rk5gjadHLv6ez2FCWKYsuH61WkYAmXXsvXR+OMeFxohr/TL8axiMlNqMP7gzYALbAedmrS63WQuMwq77/am6olMIjKHnC5ienywgj0BTsuLUxx1EC7GUuVTtubk1UGoYQxM06sqczREYCpybxvSePjYZJDCD2bNp6ZFGuHjjnmZWvO7a6xovkiG+VPufqgUYHMKxTx6HTs+PN+Dgjn+nnfQCEwqvj8qNxJz4YPGju3RvNHnKSQd74jr5WASCsuPhmoy8PjJAQB239dqlEzUCqsyuilMBrOr+tyEIIRkmIbAv2djoAQOH8ORkASp0EgAzKDdOC0RLqEFcZABx+/3Y1MIrFPDD+RzR9ggkAFM6+SA8lycLa2xdpxcMjZb4vWQgjp9YiF+RK8fRtK9YiWxzwlAlrv7CwnUujf7+zwSKrH9LoZ/14wWf+0iycFzHQ3+3w2p8yvB7HC79Gs1HVXr+PvDKlxiLCd967j9yQhGfbc+/+/cuDODyHtBxkqgsfC1RR2TnIUC2e2Ck7JyfVA+d/TQ==" />
+                            </abbr>
+                            <abbr title="filter-node">
+                                <img draggable="false" src="data:image/webp;base64,UklGRhgBAABXRUJQVlA4TAwBAAAvP8APEFW4jSTZVX5ImNjEQBrSJAYdBEUipPDNnwPmM796d18M2rp3qIkkSY1ueM/MGL2GZ9RGkqOisPwZLYYc7tcYrsy0bTP+DHsHw24zctvGkSNh6u6e6hdMrTNjC+3m0W2ly8BxNbk/UWBPQnr9lTsV2cOIe0pIi/IJFG0wb6/xQGGGIM3HFiiiagK1gcJERkeVaXaMmrRy2SgTLcesWUo9HJfptD7jiFEHbacoH927LUblyEzcsvnYVP8twCOjy5SQp46QeQB1egGIToeuwJzaHcZFcTiOKvUYlIJIS8AxpM51he4leOKiutCUxf6QSQ+AnreM/ZhIcXiiPD+GY8Z1REiiwQP85tMY" />
+                            </abbr>
+                        </div>
+                    </resizable-window>
+
+                    <!-- Options -->
+                    <resizable-window id="tool-options">
+                        <p>Tool Options</p>
+                        <div>
+                            <div id="basic-node-options">
+                                <h4>Basic Node</h4>
+                            </div>
+
+                            <div id="rectangle-node-options">
+                                <h4>Rectangle Node</h4>
+                            </div>
+
+                            <div id="filter-node-options">
+                                <h4>Filter Node</h4>
+                            </div>
+                        </div>
+                    </resizable-window>
+
+                </resizable-window>
+
+                <!-- Preview -->
+                <resizable-window id="preview-container"></resizable-window>
+                
+            </resizable-window>
+
+            <!-- Timeline -->
+            <resizable-window id="timeline-container"></resizable-window>
+
+        </resizable-window>
+
+        <!-- Right half -->
+        <resizable-window resize="vertical" split="25%" min-split="10%" max-split="calc(100% / 3)">
+
+            <!-- Top -->
+            <resizable-window id="menu-options" resize="vertical">
+                <p>Menu Options</p>
+                <div>
+                    <div id="import-options">
+                        <h4>Import Settings</h4>
+                    </div>
+                    <div id="open-project-options">
+                        <h4>Open Project</h4>
+                    </div>
+                    <div id="export-options">
+                        <h4>Export Settings</h4>
+                    </div>
+                    <div id="save-project-options">
+                        <h4>Save Project</h4>
+                    </div>
+
+                    <div id="graphic-size-options">
+                        <h4>Graphic Size</h4>
+                    </div>
+                    <div id="repeat-count">
+                        <h4>Repeat Count</h4>
+                    </div>
+                    <div id="duration">
+                        <h4>Duration</h4>
+                    </div>
+
+                    <div id="view-box">
+                        <h4>View Box</h4>
+                    </div>
+                    <div id="preserve-aspect-ratio">
+                        <h4>Preserve Aspect Ratio</h4>
+                    </div>
+
+                    <div id="frame-rate">
+                        <h4>Frame Rate</h4>
+                    </div>
+                    <div id="video-encoder-config">
+                        <h4>Video Encoder Config</h4>
+                    </div>
+                </div>
+            </resizable-window>
+            
+            <resizable-window resize="vertical" split="calc(100% * (2/5))" min-split="calc(100% * (1/5))" max-split="calc(100% * (4/5))">
+
+                <!-- Middle -->
+                <resizable-window id="raw-node-container">
+                    <p>Raw Node</p>
+                    <div>
+                        <textarea style="width: 50%; height: 50%; resize: none;"></textarea>
+                    </div>
+                </resizable-window>
+
+                <!-- Bottom -->
+                <resizable-window id="node-hierarchy">
+                    <p>Node Hierarchy</p>
+                    <div>
+                        
+                    </div>
+                </resizable-window>
+
+            </resizable-window>
+
+        </resizable-window>
+
+    </resizable-window>
+</body>
+</html>
