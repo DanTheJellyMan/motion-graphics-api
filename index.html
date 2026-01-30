@@ -4,11 +4,11 @@
     <meta charset="utf8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Motion Graphics API</title>
-    <link rel="stylesheet" href="src/style.css">
+    <link rel="stylesheet" href="/src/style.css">
 
-    <script src="gif-js/gif.js"></script>
-    <script type="module" src="src/modules/ResizableWindow.js"></script>
-    <script type="module" src="src/script.js"></script>
+    <script src="/gif-js/gif.js"></script>
+    <script type="module" src="/src/modules/ResizableWindow.js"></script>
+    <script type="module" src="/src/script.js"></script>
 </head>
 
 <body>
@@ -17,28 +17,48 @@
             <p>File</p>
             <ul>
                 <li>Import</li>
+                <li>Open Project</li>
+                <hr />
                 <li>Export</li>
+                <li>Save Project</li>
             </ul>
         </div>
         
         <div class="dropdown">
             <p>Edit</p>
             <ul>
-                <li>uhhh</li>
+                <li>Undo</li>
+                <li>Redo</li>
+                <hr />
+                <li>Cut</li>
+                <li>Copy</li>
+                <li>Paste</li>
             </ul>
         </div>
 
         <div class="dropdown">
             <p>View</p>
             <ul>
-                
+                <li>Zoom In</li>
+                <li>Zoom Out</li>
+                <li onclick="document.body.requestFullscreen()">
+                    Fullscreen
+                </li>
             </ul>
         </div>
 
         <div class="dropdown">
-            <p>Canvas</p>
+            <p>Graphic</p>
             <ul>
-                
+                <li>Graphic Size</li>
+                <li>Repeat Count</li>
+                <li>Duration</li>
+                <hr />
+                <li>View Box</li>
+                <li>Preserve Aspect Ratio</li>
+                <hr />
+                <li>Frame Rate</li>
+                <li>Video Encoder Config</li>
             </ul>
         </div>
     </div>
@@ -60,14 +80,14 @@
                     <resizable-window id="tools">
                         <p>Tools</p>
                         <div>
-                            <abbr title="Blank">
-                                <img draggable="false" src="tool-sprites/basic-node.webp" />
+                            <abbr title="basic-node">
+                                <img draggable="false" src="/tool-sprites/basic-node.webp" />
                             </abbr>
-                            <abbr title="Rectangle">
-                                <img draggable="false" src="tool-sprites/rect-node.webp" />
+                            <abbr title="rectangle-node">
+                                <img draggable="false" src="/tool-sprites/rect-node.webp" />
                             </abbr>
-                            <abbr title="Filter">
-                                <img draggable="false" src="tool-sprites/filter-node.webp" />
+                            <abbr title="filter-node">
+                                <img draggable="false" src="/tool-sprites/filter-node.webp" />
                             </abbr>
                         </div>
                     </resizable-window>
@@ -76,7 +96,17 @@
                     <resizable-window id="tool-options">
                         <p>Tool Options</p>
                         <div>
+                            <div id="basic-node-options">
+                                <h4>Basic Node</h4>
+                            </div>
 
+                            <div id="rectangle-node-options">
+                                <h4>Rectangle Node</h4>
+                            </div>
+
+                            <div id="filter-node-options">
+                                <h4>Filter Node</h4>
+                            </div>
                         </div>
                     </resizable-window>
 
@@ -99,28 +129,59 @@
             <resizable-window id="menu-options" resize="vertical">
                 <p>Menu Options</p>
                 <div>
+                    <div id="import-options">
+                        <h4>Import Settings</h4>
+                    </div>
+                    <div id="open-project-options">
+                        <h4>Open Project</h4>
+                    </div>
+                    <div id="export-options">
+                        <h4>Export Settings</h4>
+                    </div>
+                    <div id="save-project-options">
+                        <h4>Save Project</h4>
+                    </div>
 
+                    <div id="graphic-size-options">
+                        <h4>Graphic Size</h4>
+                    </div>
+                    <div id="repeat-count">
+                        <h4>Repeat Count</h4>
+                    </div>
+                    <div id="duration">
+                        <h4>Duration</h4>
+                    </div>
+
+                    <div id="view-box">
+                        <h4>View Box</h4>
+                    </div>
+                    <div id="preserve-aspect-ratio">
+                        <h4>Preserve Aspect Ratio</h4>
+                    </div>
+
+                    <div id="frame-rate">
+                        <h4>Frame Rate</h4>
+                    </div>
+                    <div id="video-encoder-config">
+                        <h4>Video Encoder Config</h4>
+                    </div>
                 </div>
             </resizable-window>
             
-            <resizable-window resize="vertical" split="calc(100% * (2/5))" min-split="calc(100% * (1/5))" max-split="calc(100% * (4/5))">
+            <!-- Middle -->
+            <resizable-window id="raw-node-container" resize="vertical" split="calc(100% * (2/5))" min-split="calc(100% * (1/5))" max-split="calc(100% * (4/5))">
+                <p>Raw Node</p>
+                <div>
+                    <textarea style="width: 50%; height: 50%; resize: none;"></textarea>
+                </div>
+            </resizable-window>
 
-                <!-- Middle -->
-                <resizable-window id="raw-node-container">
-                    <p>Raw Node</p>
-                    <div>
-
-                    </div>
-                </resizable-window>
-
-                <!-- Bottom -->
-                <resizable-window id="node-hierarchy">
-                    <p>Node Hierarchy</p>
-                    <div>
-                        
-                    </div>
-                </resizable-window>
-
+            <!-- Bottom -->
+            <resizable-window id="node-hierarchy">
+                <p>Node Hierarchy</p>
+                <div>
+                    
+                </div>
             </resizable-window>
 
         </resizable-window>

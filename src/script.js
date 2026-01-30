@@ -1,108 +1,14 @@
+import CustomButton from "./modules/CustomButton.ts";
 import Graphic from "./modules/Graphic.js";
 import GraphicNode from "./modules/GraphicNode.js";
 
 initDropdowns();
-// const { projectData, graphic } = loadProject(JSON.parse(String.raw`
+initTools();
+
+/* Test demonstrating project-saving functionality */
+// const { projectData, graphic } = Graphic.loadProject(JSON.parse(String.raw`
 //     {"graphic":{"nodes":["{\"elementName\":\"svg\",\"id\":\"\",\"className\":\"\",\"textContent\":\"\",\"keyframes\":[{\"t\":0,\"attribs\":{\"width\":1000,\"height\":1000}}],\"children\":[{\"elementName\":\"rect\",\"id\":\"\",\"className\":\"\",\"textContent\":\"\",\"keyframes\":[{\"t\":0,\"attribs\":{\"x\":0,\"y\":0,\"width\":1000,\"height\":1000,\"fill\":\"hsl(300,0%,30%)\",\"stroke\":\"white\",\"stroke-width\":\"4%\",\"stroke-linecap\":\"round\",\"stroke-dasharray\":\"4% 17%\",\"stroke-dashoffset\":\"0%\"}},{\"t\":1,\"attribs\":{\"x\":0,\"y\":0,\"width\":1000,\"height\":1000,\"fill\":\"hsl(300,0%,30%)\",\"stroke\":\"white\",\"stroke-width\":\"4%\",\"stroke-linecap\":\"round\",\"stroke-dasharray\":\"4% 17%\",\"stroke-dashoffset\":\"21%\"}}],\"children\":[]},{\"elementName\":\"text\",\"id\":\"\",\"className\":\"\",\"textContent\":\"\",\"keyframes\":[{\"t\":0,\"attribs\":{\"font-size\":\"333.3333333333333px\",\"fill\":\"hsl(0,100%,50%)\"}},{\"t\":0.3333333333333333,\"attribs\":{\"font-size\":\"333.3333333333333px\",\"fill\":\"hsl(120,100%,50%)\"}},{\"t\":0.6666666666666666,\"attribs\":{\"font-size\":\"333.3333333333333px\",\"fill\":\"hsl(240,100%,50%)\"}},{\"t\":1,\"attribs\":{\"font-size\":\"333.3333333333333px\",\"fill\":\"hsl(360,100%,50%)\"}}],\"children\":[{\"elementName\":\"tspan\",\"id\":\"\",\"className\":\"\",\"textContent\":\"so\",\"keyframes\":[{\"t\":0,\"attribs\":{\"x\":250,\"y\":333.3333333333333,\"dy\":\"7%\"}}],\"children\":[]},{\"elementName\":\"tspan\",\"id\":\"\",\"className\":\"\",\"textContent\":\"cool\",\"keyframes\":[{\"t\":0,\"attribs\":{\"x\":250,\"y\":333.3333333333333,\"dy\":\"333.3333333333333px\"}}],\"children\":[]}]}]}"],"width":1000,"height":1000,"repeatCount":null,"duration":2,"fps":15,"viewBox":"0 0 1000 1000","preserveAspectRatio":"","videoEncoderConfig":null}}
 // `));
-
-/* PROJECT FORMAT:
-    {
-        // REQUIRED
-        graphic: {
-            // REQUIRED
-            nodes: SerializedGraphicNode[],
-            width: number,
-            height: number,
-            repeatCount: number,
-            duration: number,
-
-            // NOT REQUIRED
-            fps: number,
-            viewBox: string
-            preserveAspectRatio: string,
-            videoEncoderConfig: Object
-        },
-
-        // NOT REQUIRED
-        ui: {
-            html: string
-        }
-    }
-*/
-/* TODO: verification checks for properties in the load and create functions (wherever exists() is called) */
-function loadProject(projectData) {
-    if (!projectData) {
-        projectData = createProject();
-    }
-    const { graphic: options } = projectData;
-    const graphic = new Graphic(options.width, options.height, options.repeatCount, options.duration);
-    if (exists(options, "fps")) {
-        graphic.setFps(options.fps);
-    }
-    if (exists(options, "viewBox")) {
-        graphic.setSvgViewBox(options.viewBox);
-    }
-    if (exists(options, "preserveAspectRatio")) {
-        graphic.setSvgPreserveAspectRatio(options.preserveAspectRatio);
-    }
-    if (exists(options, "videoEncoderConfig") && options.videoEncoderConfig) {
-        graphic.setVideoEncoderConfig(options.videoEncoderConfig);
-    }
-
-    for (const serializedNode of options.nodes) {
-        const graphicNode = GraphicNode.fromSerialized(serializedNode);
-        graphic.addNode(graphicNode);
-    }
-
-    if (exists(projectData, "ui")) {
-        const { ui } = projectData;
-        if (exists(ui, "html")) {
-            document.body.innerHTML = ui.html;
-        }
-    }
-
-    return { projectData, graphic };
-}
-function createProject(params = {}) {
-    if (!exists(params, "graphic")) {
-        params.graphic = {};
-    }
-    const g = params.graphic;
-    if (!exists(g, "nodes")) {
-        g.nodes = [];
-    }
-    if (!exists(g, "width")) {
-        g.width = 800;
-    }
-    if (!exists(g, "height")) {
-        g.height = 600;
-    }
-    if (!exists(g, "repeatCount")) {
-        g.repeatCount = Infinity;
-    }
-    if (!exists(g, "duration")) {
-        g.duration = 1;
-    }
-
-    // Do validation for non-required graphic options
-    // ...
-
-    if (exists(params, "ui")) {
-        const { ui } = params;
-        if (exists(ui, "html") && false) {
-            delete ui.html;
-        }
-    }
-
-    return params;
-}
-function exists(obj, propName) {
-    return (
-        propName in obj &&
-        obj[propName] !== undefined
-    );
-}
 
 function initDropdowns() {
     const dropdownContainers = document.querySelectorAll("body > *:has(.dropdown)");
@@ -126,8 +32,14 @@ function initDropdowns() {
                 dropdown.classList.add("expanded");
             });
 
-            dropdown.querySelectorAll("ul > li").forEach((ul) => {
-                ul.setAttribute("tabindex", "0");
+            dropdown.querySelectorAll("ul > li").forEach((li) => {
+                li.setAttribute("tabindex", "0");
+
+                li.addEventListener("click", (e) => {
+                    if (li.classList.contains("keep-expanded-after-click")) return;
+                    shrinkDropdowns();
+                    selectingDropdown = false;
+                });
             });
         });
 
@@ -142,6 +54,53 @@ function initDropdowns() {
                 dropdown.classList.remove("expanded");
             });
         }
+    });
+}
+
+function initTools() {
+    const normalizeOptionsId = (str) => {
+        return str.toLowerCase().replaceAll(" ", "-").replaceAll("-options", "");
+    }
+
+    const menuOptionsContainer = document.querySelectorAll("#menu-options > div > div");
+    const toolbarLis = document.querySelectorAll("#toolbar > .dropdown > ul > li");
+    toolbarLis.forEach((li) => {
+        const liText = normalizeOptionsId(li.textContent);
+
+        li.addEventListener("click", (e) => {
+            let formerVisibleMenuOptions = null;
+            let matchFound = false;
+            menuOptionsContainer.forEach((menuOptions) => {
+                if (normalizeOptionsId(menuOptions.id) === liText) {
+                    menuOptions.classList.add("visible");
+                    matchFound = true;
+                } else {
+                    menuOptions.classList.remove("visible");
+                    formerVisibleMenuOptions ??= menuOptions;
+                }
+            });
+
+            if (formerVisibleMenuOptions !== null && !matchFound) {
+                formerVisibleMenuOptions.classList.add("visible");
+            }
+        });
+    });
+
+    const toolOptionsContainer = document.querySelectorAll("#tool-options > div > div");
+    const toolAbbrs = document.querySelectorAll("#tools > div > abbr");
+    toolAbbrs.forEach((abbr) => {
+        const img = abbr.querySelector("img");
+        const title = normalizeOptionsId(abbr.title);
+        img.addEventListener("click", () => {
+            toolOptionsContainer.forEach((toolOptions) => {
+                if (normalizeOptionsId(toolOptions.id) === title) {
+                    toolOptions.classList.add("visible");
+                } else {
+                    toolOptions.classList.remove("visible");
+                }
+            });
+            
+        });
     });
 }
 
@@ -252,7 +211,7 @@ graphic.addNode(parentNode);
 // console.log(JSON.stringify(graphic.exportProjectData(false), null, 4));
 
 const startT = performance.now();
-graphic.render("SVG").then(handleRenderFinish);
+// graphic.render("SVG").then(handleRenderFinish);
 // graphic.render("GIF").then(handleRenderFinish);
 // graphic.render("VIDEO", null, async (bitmap, i) => {
 //     ctx.transferFromImageBitmap(bitmap);

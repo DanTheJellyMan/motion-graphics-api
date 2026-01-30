@@ -376,6 +376,99 @@ export default class Graphic {
         }
     }
 
+    /* PROJECT FORMAT:
+        {
+            // REQUIRED
+            graphic: {
+                // REQUIRED
+                nodes: SerializedGraphicNode[],
+                width: number,
+                height: number,
+                repeatCount: number,
+                duration: number,
+    
+                // NOT REQUIRED
+                fps: number,
+                viewBox: string
+                preserveAspectRatio: string,
+                videoEncoderConfig: Object
+            },
+    
+            // NOT REQUIRED
+            ui: {
+                html: string
+            }
+        }
+    */
+    /* TODO: add verification checks for properties in the load and create functions (wherever exists() is called) */
+    static loadProject(projectData) {
+        const exists = (obj, propName) => propName in obj && obj[propName] !== undefined;
+        if (!projectData) {
+            projectData = Graphic.createProject();
+        }
+        const { graphic: options } = projectData;
+        const graphic = new Graphic(options.width, options.height, options.repeatCount, options.duration);
+        if (exists(options, "fps")) {
+            graphic.setFps(options.fps);
+        }
+        if (exists(options, "viewBox")) {
+            graphic.setSvgViewBox(options.viewBox);
+        }
+        if (exists(options, "preserveAspectRatio")) {
+            graphic.setSvgPreserveAspectRatio(options.preserveAspectRatio);
+        }
+        if (exists(options, "videoEncoderConfig") && options.videoEncoderConfig) {
+            graphic.setVideoEncoderConfig(options.videoEncoderConfig);
+        }
+    
+        for (const serializedNode of options.nodes) {
+            const graphicNode = GraphicNode.fromSerialized(serializedNode);
+            graphic.addNode(graphicNode);
+        }
+    
+        if (exists(projectData, "ui")) {
+            const { ui } = projectData;
+            if (exists(ui, "html")) {
+                document.body.innerHTML = ui.html;
+            }
+        }
+    
+        return { projectData, graphic };
+    }
+    static createProject(params = {}) {
+        const exists = (obj, propName) => propName in obj && obj[propName] !== undefined;
+        if (!exists(params, "graphic")) {
+            params.graphic = {};
+        }
+        const g = params.graphic;
+        if (!exists(g, "nodes")) {
+            g.nodes = [];
+        }
+        if (!exists(g, "width")) {
+            g.width = 800;
+        }
+        if (!exists(g, "height")) {
+            g.height = 600;
+        }
+        if (!exists(g, "repeatCount")) {
+            g.repeatCount = Infinity;
+        }
+        if (!exists(g, "duration")) {
+            g.duration = 1;
+        }
+    
+        // Do validation for non-required graphic options
+        // ...
+    
+        if (exists(params, "ui")) {
+            const { ui } = params;
+            if (exists(ui, "html") && false) {
+                delete ui.html;
+            }
+        }
+    
+        return params;
+    }
     exportProjectData(includeUI = false) {
         const serializedNodes = this.#nodes.map((node) => node.serializeToString());
         const extraData = {};

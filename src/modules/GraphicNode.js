@@ -70,7 +70,7 @@ export default class GraphicNode {
         const classNames = [];
 
         let elementNameFound = false;
-        switch (selector[0]) {
+        switch(selector[0]) {
             case "#": case ".":
                 elementNameFound = true;
                 break;
@@ -286,7 +286,6 @@ export default class GraphicNode {
 
     #setParent(graphicNode) {
         // TODO: check for any recursive-ness before setting
-        this
 
         this.#parent = graphicNode;
         return true;

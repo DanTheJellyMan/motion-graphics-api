@@ -105,6 +105,10 @@ body {
     backdrop-filter: brightness(90%);
 }
 
+.dropdown > ul > hr {
+    margin: 0.25rem 0 0.325rem 0;
+}
+
 
 
 #main {
@@ -171,6 +175,14 @@ body {
         box-shadow calc(var(--scale-dur-in) * (4/5)) ease-out;
 }
 
+#menu-options > div > div, #tool-options > div > div {
+    display: none;
+    flex-direction: column;
+}
+#menu-options > div > div.visible, #tool-options > div > div.visible {
+    display: flex;
+}
+
 
 
 resizable-window {
@@ -179,6 +191,8 @@ resizable-window {
         calc(var(--primary-saturation) - 10%),
         calc(var(--primary-lightness) + 10%)
     );
+
+    overflow: auto;
 
     background-color: var(--light-primary-color);
     border-width: 0;
@@ -215,7 +229,7 @@ resizable-window:focus-within > p {
 
 resizable-window > div {
     height: 100%;
-    overflow: auto;
+    /* overflow: auto; */
 
     background-color: inherit;
 }
