@@ -1,13 +1,17 @@
 import WebComponentBase from "./WebComponentBase.ts";
 
 const DEFAULT_ATTRIBUTES = {
-
+    "type": "button", // button, slider, dropdown (both "generic" toolbar and tool option styles)
+    "title": "",
+    "imgSrc": "",
+    "enableSubtitle": "false", // Enables text displaying a value
+    "enableSlider": "true"
 }
 
-export default class CustomButton extends WebComponentBase {
+export default class CustomInput extends WebComponentBase {
+    public static override observedAttributes = Object.keys(DEFAULT_ATTRIBUTES);
     protected override defaultAttributes = DEFAULT_ATTRIBUTES;
     protected override attributeTesters = {};
-    public static override observedAttributes = Object.keys(DEFAULT_ATTRIBUTES);
 
     public override connectedCallback(): void {
         
@@ -25,4 +29,4 @@ export default class CustomButton extends WebComponentBase {
     }
 }
 
-customElements.define("custom-button", CustomButton);
+customElements.define("custom-button", CustomInput);

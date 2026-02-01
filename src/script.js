@@ -1,4 +1,4 @@
-import CustomButton from "./modules/CustomButton.ts";
+import CustomInput from "./modules/CustomInput.ts";
 import Graphic from "./modules/Graphic.js";
 import GraphicNode from "./modules/GraphicNode.js";
 

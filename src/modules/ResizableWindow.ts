@@ -1,4 +1,4 @@
-import WebComponentBase, { AttributeTester } from "./WebComponentBase.ts";
+import WebComponentBase from "./WebComponentBase.ts";
 
 const DEFAULT_ATTRIBUTES = {
     "resize": "none",
@@ -56,7 +56,7 @@ export default class ResizableWindow extends WebComponentBase {
             const ch1 = this.children[cLen-2];
             const ch2 = this.children[cLen-1];
             
-            const parent = document.createElement("resizable-window");
+            const parent = ch1.cloneNode(false);
             parent.appendChild(ch1.cloneNode(true));
             parent.appendChild(ch2.cloneNode(true));
             this.appendChild(parent);
@@ -103,17 +103,17 @@ export default class ResizableWindow extends WebComponentBase {
     }
 
     private handleMousemove(e: PointerEvent): void {
-        const { clientX, clientY } = e;
+        const { pageX: x, pageY: y } = e;
         const mousedown = this.mousedown;
         let topmostAncestor = this.getTopmostAncestor();
-        if (!this.canMouseResize(clientX, clientY) && !mousedown) {
-            if (!this.hasDeeperHoveredElements(clientX, clientY)) {
+        if (!this.canMouseResize(x, y) && !mousedown) {
+            if (!this.hasDeeperHoveredElements(x, y)) {
                 topmostAncestor.style.setProperty("cursor", "default", "important");
+                e.stopPropagation();
             }
             return;
         }
         
-        // TODO: make "split" more accurate so that borders actually follow along with the cursor while resizing
         const resize = this.getAttribute("resize");
         const rect = this.getBoundingClientRect();
         let cursorType = "default";
@@ -121,40 +121,43 @@ export default class ResizableWindow extends WebComponentBase {
         switch(resize) {
             case "horizontal":
                 cursorType = "ew-resize";
-                t = (clientX - rect.left) / rect.right;
+                t = (x - rect.left) / rect.width;
                 e.stopPropagation();
                 break;
             case "vertical":
                 cursorType = "ns-resize";
-                t = (clientY - rect.top) / rect.bottom;
+                t = (y - rect.top) / rect.height;
                 e.stopPropagation();
                 break;
         }
         
         topmostAncestor.style.setProperty("cursor", cursorType, "important");
+        // console.log(`MOUSE: (${x}, ${y})\tRECT: ${JSON.stringify(rect)} \t${t}`);
         if (mousedown) {
             this.setAttribute("split", `${t*100}%`);
         }
     }
     public canMouseResize(x: number, y: number): boolean {
-        if (this.children.length < 2) return false;
+        const windowChildren = Array.from(this.children).filter((child) => child.nodeName === this.nodeName);
+        if (windowChildren.length < 2) return false;
 
-        const rect = this.children[this.children.length-1].getBoundingClientRect();
+        const rect = windowChildren[windowChildren.length-1].getBoundingClientRect();
         const resizableAreaLength = parseFloat(this.getAttribute("resizable-area-length")!);
-        let rectSide: number, axis: number;
-
+        let rectSide: number, axisValue: number;
+        
         if (this.getAttribute("resize") === "horizontal") {
             rectSide = rect.left;
-            axis = x;
+            axisValue = x;
         } else {
             rectSide = rect.top;
-            axis = y;
+            axisValue = y;
         }
-        
-        return (
-            rectSide - resizableAreaLength <= axis &&
-            rectSide + resizableAreaLength >= axis
+
+        const result = (
+            rectSide - resizableAreaLength <= axisValue &&
+            rectSide + resizableAreaLength >= axisValue
         );
+        return result;
     }
     public hasDeeperHoveredElements(x: number, y: number): boolean {
         const isHovered = (element: Element) => {
@@ -164,9 +167,9 @@ export default class ResizableWindow extends WebComponentBase {
             return inHorizontally && inVertically;
         }
 
-        const descendants = this.querySelectorAll("resizable-window");
+        const descendants: NodeListOf<ResizableWindow> = this.querySelectorAll("resizable-window");
         for (let i=0; i<descendants.length; i++) {
-            if (isHovered(descendants[i])) {
+            if (descendants[i].mousedown || isHovered(descendants[i])) {
                 return true;
             }
         }
@@ -206,7 +209,7 @@ export default class ResizableWindow extends WebComponentBase {
     }
 
     private handleMousedown(e: PointerEvent) {
-        if (!this.canMouseResize(e.clientX, e.clientY)) return;
+        if (!this.canMouseResize(e.pageX, e.pageY)) return;
         this.mousedown = true;
     }
     private handleMouseup(e: PointerEvent) {

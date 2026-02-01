@@ -169,6 +169,7 @@ export default class GraphicNode {
         const className = classNames.join(" ");
         const results = [];
 
+        // TODO (low priority): make this function iterative, instead of recursive
         for (let i=0; i<this.#children.length; i++) {
             const child = this.#children[i];
             let validElementName = true;
