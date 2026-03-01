@@ -1,25 +1,25 @@
-import WebComponentBase from "./WebComponentBase.ts";
+import BaseComponent, { Attribute } from "./BaseComponent.ts";
 
-const DEFAULT_ATTRIBUTES = {
-    "resize": "none",
-    "split": "50%",
-    "min-split": "25%",
-    "max-split": "75%",
-    "resizable-area-length": "2"
-}
+type DefaultAttributes = keyof typeof ResizableWindow.defaultAttributes;
 
-export default class ResizableWindow extends WebComponentBase {
-    public static override observedAttributes = Object.keys(DEFAULT_ATTRIBUTES);
-    protected override defaultAttributes = DEFAULT_ATTRIBUTES;
-    protected override attributeTesters = {
-        "resize": (value: string) => {
+export default class ResizableWindow extends BaseComponent {
+    public static override defaultAttributes = Object.freeze({
+        "resize": "none",
+        "split": "50%",
+        "min-split": "25%",
+        "max-split": "75%",
+        "resizable-area-length": "2"
+    });
+    public static override observedAttributes: Readonly<DefaultAttributes[]> = Object.freeze(Object.keys(ResizableWindow.defaultAttributes)) as DefaultAttributes[];
+    protected override attributeTesters: Readonly<Record<DefaultAttributes, (value: Attribute) => boolean>> = {
+        "resize"(value) {
             const values = ["none", "horizontal", "vertical"];
-            return values.includes(value);
+            return values.includes(value!);
         },
-        "split": (value: string) => {
+        "split"(value) {
             return (
-                CSS.supports("grid-template-rows", value) &&
-                CSS.supports("grid-template-columns", value)
+                CSS.supports("grid-template-rows", value!) &&
+                CSS.supports("grid-template-columns", value!)
             );
         },
         get "min-split"() {
@@ -28,10 +28,10 @@ export default class ResizableWindow extends WebComponentBase {
         get "max-split"() {
             return this.split;
         },
-        "resizable-area-length": (value: string) => {
-            return !isNaN(parseFloat(value));
+        "resizable-area-length"(value) {
+            return !isNaN(parseFloat(value!));
         }
-    }
+    };
 
     private mousedown = false;
 
@@ -57,31 +57,11 @@ export default class ResizableWindow extends WebComponentBase {
             const ch2 = this.children[cLen-1];
             
             const parent = ch1.cloneNode(false);
-            parent.appendChild(ch1.cloneNode(true));
-            parent.appendChild(ch2.cloneNode(true));
+            parent.insertBefore(ch1, null);
+            parent.insertBefore(ch2, null);
             this.appendChild(parent);
-            ch1.remove();
-            ch2.remove();
         }
-
-        // Setting default attributes
-        for (const [attributeName, attributeValue] of Object.entries(this.defaultAttributes)) {
-            if (this.getAttribute(attributeName) !== null) continue;
-            this.setAttribute(attributeName, attributeValue);
-        }
-        
-        // Correcting invalid attribute values
-        type DefaultAttribute = keyof typeof this.defaultAttributes;
-        const attributeNames = this.getAttributeNames();
-        for (let i=0; i<attributeNames.length; i++) {
-            const attributeName: DefaultAttribute = attributeNames[i] as DefaultAttribute;
-            if (!(attributeName in this.defaultAttributes)) continue;
-
-            const attributeValue = this.getAttribute(attributeName)!;
-            if (this.attributeTesters[attributeName](attributeValue)) continue;
-            this.setAttribute(attributeName, this.defaultAttributes[attributeName]);
-        }
-        this.draggable = false;
+        super.connectedCallback();
         this.tabIndex = -1;
 
         // Setting default CSS styles
@@ -113,7 +93,7 @@ export default class ResizableWindow extends WebComponentBase {
             }
             return;
         }
-        
+
         const resize = this.getAttribute("resize");
         const rect = this.getBoundingClientRect();
         let cursorType = "default";
@@ -220,10 +200,9 @@ export default class ResizableWindow extends WebComponentBase {
 
     }
 
-    public override attributeChangedCallback(name: string, oldValue: string, newValue: string): boolean | null {
-        type Attribute = string | null;
+    public override attributeChangedCallback(name: string, oldValue: Attribute, newValue: Attribute): boolean | null {
         const isValid = super.attributeChangedCallback(name, oldValue, newValue);
-        if (isValid === null || isValid === false) return null;
+        if (isValid !== true) return isValid;
 
         const setGridTemplate = (minSplit: Attribute = null, maxSplit: Attribute = null, resize: Attribute = null) => {
             minSplit ??= this.getAttribute("min-split");
@@ -286,6 +265,7 @@ export default class ResizableWindow extends WebComponentBase {
                 setChildrenBorderWidths(null, newValue);
                 break;
         }
+
         return true;
     }
 }

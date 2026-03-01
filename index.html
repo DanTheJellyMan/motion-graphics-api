@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/src/style.css">
 
     <script src="/gif-js/gif.js"></script>
-    <script type="module" src="/src/modules/ResizableWindow.js"></script>
+    <script type="module" src="/src/modules/ResizableWindowComponent.ts"></script>
     <script type="module" src="/src/script.js"></script>
 </head>
 
@@ -80,6 +80,7 @@
                     <resizable-window id="tools">
                         <p>Tools</p>
                         <div>
+                            <!-- TODO: REMOVE ALL ABBRS, NOT NECESSARY FOR "TITLE" ATTRIBUTE -->
                             <abbr title="basic-node">
                                 <img draggable="false" src="/tool-sprites/basic-node.webp" />
                             </abbr>
@@ -98,6 +99,11 @@
                         <div>
                             <div id="basic-node-options">
                                 <h4>Basic Node</h4>
+                                <!-- <custom-input
+                                    type="slider"
+                                    name="wowzers"
+                                    style="width: 100px; aspect-ratio: 1/1; background-image: url('https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/5746bae2-9026-4743-9066-75a7eef7b51e/dfg7rbm-3d18216a-2654-4184-8af2-e822f39b26ed.png/v1/crop/w_125,h_125,x_0,y_16,scl_0.09018759018759/render__181____reze_by_bbernkastel_dfg7rbm-125s.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTk0NiIsInBhdGgiOiIvZi81NzQ2YmFlMi05MDI2LTQ3NDMtOTA2Ni03NWE3ZWVmN2I1MWUvZGZnN3JibS0zZDE4MjE2YS0yNjU0LTQxODQtOGFmMi1lODIyZjM5YjI2ZWQucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.6-ihHQoG4bXxbWWkN6exy3PifD2DBvZXTsjFoFwYlwQ'); background-size: cover;"
+                                ></custom-input> -->
                             </div>
 
                             <div id="rectangle-node-options">
