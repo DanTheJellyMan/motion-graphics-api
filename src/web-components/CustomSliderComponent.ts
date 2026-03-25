@@ -1,23 +1,18 @@
 import BaseComponent, { Attribute } from "./BaseComponent.ts";
 
-type DefaultAttributes = keyof typeof CustomDropdown.defaultAttributes;
+type DefaultAttributes = keyof typeof CustomSlider.defaultAttributes;
 
-export default class CustomDropdown extends BaseComponent {
-    // Include 2 options for either:
-    // value = element display text (dropdown directly over main element)
-    // or not (dropdown will be lower than it, and not include display text in dropdown options).
-    // Look at GIMP for reference.
+export default class CustomSlider extends BaseComponent {
     public static override defaultAttributes = Object.freeze({
-        
+
     });
-    public static override observedAttributes: Readonly<DefaultAttributes[]> = Object.keys(CustomDropdown.defaultAttributes) as DefaultAttributes[];
+    public static override observedAttributes: Readonly<DefaultAttributes[]> = Object.freeze(Object.keys(CustomSlider.defaultAttributes)) as DefaultAttributes[];
     protected override attributeTesters: Readonly<Record<DefaultAttributes, (value: Attribute) => boolean>> = {
 
     };
 
     public override connectedCallback(): void {
-        super.connectedCallback();
-        this.tabIndex = 0;
+
     }
 
     public override disconnectedCallback(): void {
@@ -32,4 +27,4 @@ export default class CustomDropdown extends BaseComponent {
     }
 }
 
-customElements.define("custom-dropdown", CustomDropdown);
+customElements.define("custom-slider", CustomSlider);

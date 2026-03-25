@@ -7,7 +7,10 @@
     <link rel="stylesheet" href="/src/style.css">
 
     <script src="/gif-js/gif.js"></script>
-    <script type="module" src="/src/modules/ResizableWindowComponent.ts"></script>
+    <script type="module" src="/src/web-components/CustomButtonComponent.ts"></script>
+    <script type="module" src="/src/web-components/CustomDropdownComponent.ts"></script>
+    <script type="module" src="/src/web-components/CustomSliderComponent.ts"></script>
+    <script type="module" src="/src/web-components/ResizableWindowComponent.ts"></script>
     <script type="module" src="/src/script.js"></script>
 </head>
 
@@ -61,6 +64,22 @@
                 <li>Video Encoder Config</li>
             </ul>
         </div>
+
+        <custom-dropdown>
+            <p class="custom-dropdown-header">Extra</p>
+            <ul class="custom-dropdown-list"></ul>
+        </custom-dropdown>
+
+        <custom-dropdown>
+            <p class="custom-dropdown-header">Other</p>
+            <ul class="custom-dropdown-list">
+                <li>Ikea</li>
+                <custom-dropdown>
+                    <p class="custom-dropdown-header"></p>
+                    <ul class="custom-dropdown-list"></ul>
+                </custom-dropdown>
+            </ul>
+        </custom-dropdown>
     </div>
 
 
@@ -82,13 +101,13 @@
                         <div>
                             <!-- TODO: REMOVE ALL ABBRS, NOT NECESSARY FOR "TITLE" ATTRIBUTE -->
                             <abbr title="basic-node">
-                                <img draggable="false" src="/tool-sprites/basic-node.webp" />
+                                <img draggable="false" src="/tool-icons/basic-node.webp" />
                             </abbr>
                             <abbr title="rectangle-node">
-                                <img draggable="false" src="/tool-sprites/rect-node.webp" />
+                                <img draggable="false" src="/tool-icons/rect-node.webp" />
                             </abbr>
                             <abbr title="filter-node">
-                                <img draggable="false" src="/tool-sprites/filter-node.webp" />
+                                <img draggable="false" src="/tool-icons/filter-node.webp" />
                             </abbr>
                         </div>
                     </resizable-window>
@@ -193,5 +212,8 @@
         </resizable-window>
 
     </resizable-window>
+
+    <!-- TODO: create attributions page to add dropdown icon attribute -->
+    <!-- By <a href="//commons.wikimedia.org/w/index.php?title=User:Nebuar&amp;action=edit&amp;redlink=1" class="new" title="User:Nebuar (page does not exist)">Nebuar</a> - <span class="int-own-work" lang="en">Own work</span>, <a href="https://creativecommons.org/licenses/by-sa/4.0" title="Creative Commons Attribution-Share Alike 4.0">CC BY-SA 4.0</a>, <a href="https://commons.wikimedia.org/w/index.php?curid=117469215">Link</a> -->
 </body>
 </html>

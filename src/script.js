@@ -1,5 +1,5 @@
-import Graphic from "./modules/Graphic.js";
-import GraphicNode from "./modules/GraphicNode.js";
+import Graphic from "./Graphic.js";
+import GraphicNode from "./GraphicNode.js";
 
 initDropdowns();
 initTools();
