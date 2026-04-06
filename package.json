@@ -1,9 +1,15 @@
 {
   "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "@tailwindcss/vite": "^4.2.2",
     "d3": "^7.9.0",
     "flubber": "^0.4.2",
     "mediabunny": "^1.27.3",
-    "vite": "^7.3.0"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwindcss": "^4.2.2",
+    "vite": "^7.3.0",
+    "zustand": "^5.0.12"
   },
   "name": "vite-folder",
   "version": "1.0.0",
@@ -20,6 +26,8 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "gh-pages": "^6.3.0"
   }
 }
